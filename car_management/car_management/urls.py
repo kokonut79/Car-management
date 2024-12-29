@@ -16,12 +16,21 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from backend_logic import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    
     path("cars/", views.read_cars, name="read_cars"),
     path("cars/", views.create_car, name="create_car"),
     path("cars/<int:car_id>/", views.delete_car, name="delete_car"),
     path("cars/<int:car_id>/", views.update_car, name="update_car"),
+    path('garages/', views.read_garages, name='read_garages'),
+    path('garages/', views.create_garage, name='create_garage'),
+    path('garages/<int:garage_id>/', views.delete_garage, name='delete_garage'),
+    path('garages/<int:garage_id>/', views.update_garage, name='update_garage'),
+    path('maintenance/', views.read_maintenance, name='read_maintenance'),
+    path('maintenance/create/', views.create_maintenance, name='create_maintenance'),
+    path('maintenance/<int:maintenance_id>/delete/', views.delete_maintenance, name='delete_maintenance'),
+    path('maintenance/<int:maintenance_id>/update/', views.update_maintenance, name='update_maintenance'),
+    path('maintenance/monthlyRequestsReport/<int:garage_id>/', views.monthly_requests_report, name='monthly_requests_report'),
 ]
