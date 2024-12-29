@@ -1,39 +1,41 @@
-from rest_framework.views import APIView
-from rest_framework.response import Response
 from rest_framework import status
-from .services import get_garages, create_garage, delete_garage, update_garage
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from .models import Car, Garage
+from .serializers import CarSerializer, CarCreateUpdateSerializer
 
-class GarageListView(APIView):
-    """Handle GET and POST requests for garages."""
+@api_view(["GET"])
+def read_cars(request):
+    cars = Car.objects.prefetch_related("garages").all()
+    serializer = CarSerializer(cars, many=True)
+    return Response(serializer.data)
 
-    def get(self, request):
-        """Retrieve all garages."""
-        garages = get_garages()
-        return Response(garages, status=status.HTTP_200_OK)
+@api_view(["POST"])
+def create_car(request):
+    serializer = CarCreateUpdateSerializer(data=request.data)
+    if serializer.is_valid():
+        car = serializer.save()
+        return Response(CarSerializer(car).data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def post(self, request):
-        """Create a new garage."""
-        garage_data = request.data
-        result = create_garage(garage_data)
-        if "error" in result:
-            return Response(result, status=status.HTTP_400_BAD_REQUEST)
-        return Response(result, status=status.HTTP_201_CREATED)
+@api_view(["DELETE"])
+def delete_car(request, car_id):
+    try:
+        car = Car.objects.get(id=car_id)
+        car.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    except Car.DoesNotExist:
+        return Response({"detail": "Car not found"}, status=status.HTTP_404_NOT_FOUND)
 
+@api_view(["PUT"])
+def update_car(request, car_id):
+    try:
+        car = Car.objects.get(id=car_id)
+    except Car.DoesNotExist:
+        return Response({"detail": "Car not found"}, status=status.HTTP_404_NOT_FOUND)
 
-class GarageDetailView(APIView):
-    """Handle GET, PUT, and DELETE requests for a specific garage."""
-
-    def put(self, request, garage_id):
-        """Update a specific garage."""
-        garage_data = request.data
-        result = update_garage(garage_id, garage_data)
-        if "error" in result:
-            return Response(result, status=status.HTTP_400_BAD_REQUEST)
-        return Response(result, status=status.HTTP_200_OK)
-
-    def delete(self, request, garage_id):
-        """Delete a specific garage."""
-        result = delete_garage(garage_id)
-        if "error" in result:
-            return Response(result, status=status.HTTP_404_NOT_FOUND)
-        return Response(result, status=status.HTTP_204_NO_CONTENT)
+    serializer = CarCreateUpdateSerializer(car, data=request.data, partial=True)
+    if serializer.is_valid():
+        car = serializer.save()
+        return Response(CarSerializer(car).data)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

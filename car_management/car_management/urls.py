@@ -19,4 +19,9 @@ from django.urls import path
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    
+    path("cars/", views.read_cars, name="read_cars"),
+    path("cars/", views.create_car, name="create_car"),
+    path("cars/<int:car_id>/", views.delete_car, name="delete_car"),
+    path("cars/<int:car_id>/", views.update_car, name="update_car"),
 ]
