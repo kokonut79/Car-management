@@ -1,13 +1,7 @@
 from django.contrib import admin
-from .models import Car,Garage
+from .models import Garage, Car, Maintenance
 
 
-@admin.register(Car)
-class CarAdmin(admin.ModelAdmin):
-    list_display = ('unique_id', 'production_year', 'make', 'model', 'license_plate')
-    search_fields = ('unique_id', 'make', 'model', 'license_plate')
-
-
-@admin.register(Garage)
-class GarageAdmin(admin.ModelAdmin):
-    list_display = ('unique_id', 'name', 'location', 'city', 'capacity')
+admin.site.register(Garage)
+admin.site.register(Car)
+admin.site.register(Maintenance)
